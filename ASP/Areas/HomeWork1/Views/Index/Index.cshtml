@@ -1,0 +1,149 @@
+﻿@model ASP.Areas.HomeWork1.Models.OrderSearchArg
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h4>OrderSearchArg</h4>
+        <hr />
+        <table border="1" width="600" cellpadding="6">
+            <tr>
+                <td style="width: 20%;">
+                    @Html.LabelFor(model => model.OrderID, htmlAttributes: new { @class = "control-label" })
+                </td>
+                <td style="width: 80%;" colspan="3">
+                    <input type="text" id="OrderID" />
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 20%;">
+                    @Html.LabelFor(model => model.CustomerName, htmlAttributes: new { @class = "control-label" })
+                </td>
+                <td style="width: 80%;" colspan="3">
+                    <input type="text" id="CustomerName" />
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 20%;">
+                    @Html.LabelFor(model => model.EmployeeName, htmlAttributes: new { @class = "control-label" })
+                </td>
+                <td style="width: 80%;" colspan="3">
+                    <select id="EmployeeName">
+                        @foreach (var Data in ViewBag.SearchData)
+                        {
+                            <option>
+                                @Data.EmployeeName
+                            </option>
+                        } 
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 20%;">
+                    @Html.LabelFor(model => model.CompanyName, htmlAttributes: new { @class = "control-label" })
+                </td>
+                <td style="width: 80%;"  colspan="3">
+                    <select id="CompanyName">
+                        @foreach (var Data in ViewBag.SearchData)
+                        {
+                            <option>
+                                @Data.CompanyName
+                            </option>
+                        } 
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 20%;">
+                    @Html.LabelFor(model => model.RequiredDate, htmlAttributes: new { @class = "control-label" })
+                </td>
+                <td style="width: 30%;">
+                    <input type="date" id="RequiredDate"/>
+                </td>
+                <td style="width: 20%;">
+                    @Html.LabelFor(model => model.ShippedDate, htmlAttributes: new { @class = "control-label" })
+                </td>
+                <td style="width: 30%;">
+                    <input type="date" id="ShippedDate" />
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 20%;">
+                    @Html.LabelFor(model => model.OrderDate, htmlAttributes: new { @class = "control-label" })
+                </td>
+                <td style="width: 80%;"  colspan="3">
+                    <input type="date" id="OrderDate" />
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 20%;">
+
+                </td>
+                <td style="width: 80%;"  colspan="3">
+                    <input type="button" value="查詢" />
+                    <input type="reset" value="清除" />
+                    <input type="button" value="新增訂單" />
+                </td>
+            </tr>
+        </table>
+    </div>
+}
+<br>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <table border="1" width="600" cellpadding="6">
+            <thead>
+                <th>@Html.LabelFor(model => model.OrderID, htmlAttributes: new { @class = "control-label" })</th>
+                <th>@Html.LabelFor(model => model.EmployeeName, htmlAttributes: new { @class = "control-label" })</th>
+                <th>@Html.LabelFor(model => model.OrderDate, htmlAttributes: new { @class = "control-label" })</th>
+                <th>@Html.LabelFor(model => model.ShippedDate, htmlAttributes: new { @class = "control-label" })</th>
+                <th>運費</th>
+                <th></th>
+                <th></th>
+            </thead>
+            @foreach (var OrderData in ViewBag.OrderData)
+            {
+                <tr>
+                    <td style="width: 15%;">
+                        @OrderData.OrderID
+                    </td>
+                    <td style="width: 15%;">
+                        Name
+                    </td>
+                    <td style="width: 20%;">
+                        @OrderData.OrderDate
+                    </td>
+                    <td style="width: 20%;">
+                        @OrderData.ShippedDate
+                    </td>
+                    <td style="width: 10%;">
+                        @OrderData.Freight
+                    </td>
+                    <td style="width: 10%;">
+                        <a href="http://localhost:57997/HomeWork1/Index/update/@OrderData.OrderID">修改</a>
+                    </td>
+                    <td style="width: 10%;">
+                        <a href="http://localhost:57997/HomeWork1/Index/delete/@OrderData.OrderID">修改</a>
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
