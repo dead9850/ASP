@@ -1,11 +1,13 @@
-﻿@model ASP.Areas.HomeWork1.Models.OrderSearchArg
+﻿@* @model ASP.Areas.HomeWork1.Models.OrderSearchArg *@
+@using System.Data
+@model DataSet
 
 @{
     ViewBag.Title = "Index";
 }
 
 <h2>Index</h2>
-
+@ViewBag.ds
 @using (Html.BeginForm()) 
 {
     @Html.AntiForgeryToken()
@@ -16,7 +18,7 @@
         <table border="1" width="600" cellpadding="6">
             <tr>
                 <td style="width: 20%;">
-                    @Html.LabelFor(model => model.OrderID, htmlAttributes: new { @class = "control-label" })
+                    訂單編號
                 </td>
                 <td style="width: 80%;" colspan="3">
                     <input type="text" id="OrderID" />
@@ -24,7 +26,7 @@
             </tr>
             <tr>
                 <td style="width: 20%;">
-                    @Html.LabelFor(model => model.CustomerName, htmlAttributes: new { @class = "control-label" })
+                    客戶名稱
                 </td>
                 <td style="width: 80%;" colspan="3">
                     <input type="text" id="CustomerName" />
@@ -32,14 +34,14 @@
             </tr>
             <tr>
                 <td style="width: 20%;">
-                    @Html.LabelFor(model => model.EmployeeName, htmlAttributes: new { @class = "control-label" })
+                    負責員工
                 </td>
                 <td style="width: 80%;" colspan="3">
                     <select id="EmployeeName">
-                        @foreach (var Data in ViewBag.SearchData)
+                        @foreach (DataRow row in Model.Tables[0].Rows)
                         {
-                            <option>
-                                @Data.EmployeeName
+                            <option id="@row["EmployeeID"]">
+                                @row["FirstName"], @row["LastName"]
                             </option>
                         } 
                     </select>
@@ -47,14 +49,14 @@
             </tr>
             <tr>
                 <td style="width: 20%;">
-                    @Html.LabelFor(model => model.CompanyName, htmlAttributes: new { @class = "control-label" })
+                    出貨公司
                 </td>
                 <td style="width: 80%;"  colspan="3">
                     <select id="CompanyName">
-                        @foreach (var Data in ViewBag.SearchData)
+                        @foreach (DataRow row in Model.Tables[1].Rows)
                         {
-                            <option>
-                                @Data.CompanyName
+                            <option id="@row["CustomerID"]">
+                                @row["CompanyName"]
                             </option>
                         } 
                     </select>
@@ -62,13 +64,13 @@
             </tr>
             <tr>
                 <td style="width: 20%;">
-                    @Html.LabelFor(model => model.RequiredDate, htmlAttributes: new { @class = "control-label" })
+                    訂購日期
                 </td>
                 <td style="width: 30%;">
                     <input type="date" id="RequiredDate"/>
                 </td>
                 <td style="width: 20%;">
-                    @Html.LabelFor(model => model.ShippedDate, htmlAttributes: new { @class = "control-label" })
+                    出貨日期
                 </td>
                 <td style="width: 30%;">
                     <input type="date" id="ShippedDate" />
@@ -76,7 +78,7 @@
             </tr>
             <tr>
                 <td style="width: 20%;">
-                    @Html.LabelFor(model => model.OrderDate, htmlAttributes: new { @class = "control-label" })
+                    需要日期
                 </td>
                 <td style="width: 80%;"  colspan="3">
                     <input type="date" id="OrderDate" />
@@ -89,7 +91,7 @@
                 <td style="width: 80%;"  colspan="3">
                     <input type="button" value="查詢" />
                     <input type="reset" value="清除" />
-                    <input type="button" value="新增訂單" />
+                    <input type="button" onclick="location.href" value="新增訂單" />
                 </td>
             </tr>
         </table>
@@ -103,38 +105,38 @@
 
     <div class="form-horizontal">
         <table border="1" width="600" cellpadding="6">
-            <thead>
-                <th>@Html.LabelFor(model => model.OrderID, htmlAttributes: new { @class = "control-label" })</th>
-                <th>@Html.LabelFor(model => model.EmployeeName, htmlAttributes: new { @class = "control-label" })</th>
-                <th>@Html.LabelFor(model => model.OrderDate, htmlAttributes: new { @class = "control-label" })</th>
-                <th>@Html.LabelFor(model => model.ShippedDate, htmlAttributes: new { @class = "control-label" })</th>
-                <th>運費</th>
-                <th></th>
-                <th></th>
-            </thead>
-            @foreach (var OrderData in ViewBag.OrderData)
+            <tr>
+                <td>訂單編號</td>
+                <td>客戶名稱</td>
+                <td>需要日期</td>
+                <td>出貨日期</td>
+                <td>運費</td>
+                <td></td>
+                <td></td>
+            </tr>
+            @foreach (DataRow row in Model.Tables[2].Rows)
             {
                 <tr>
                     <td style="width: 15%;">
-                        @OrderData.OrderID
+                        @row["OrderID"]
                     </td>
                     <td style="width: 15%;">
-                        Name
+                        @row["FirstName"], @row["LastName"]
                     </td>
                     <td style="width: 20%;">
-                        @OrderData.OrderDate
+                        @row["OrderDate"]
                     </td>
                     <td style="width: 20%;">
-                        @OrderData.ShippedDate
+                        @row["ShippedDate"]
                     </td>
                     <td style="width: 10%;">
-                        @OrderData.Freight
+                        @row["Freight"]
                     </td>
                     <td style="width: 10%;">
-                        <a href="http://localhost:57997/HomeWork1/Index/update/@OrderData.OrderID">修改</a>
+                        <a href="http://localhost:57997/HomeWork1/Index/update/@row["OrderID"]">修改</a>
                     </td>
                     <td style="width: 10%;">
-                        <a href="http://localhost:57997/HomeWork1/Index/delete/@OrderData.OrderID">修改</a>
+                        <a href="http://localhost:57997/HomeWork1/Index/delete/@row["OrderID"]">刪除</a>
                     </td>
                 </tr>
             }

@@ -7,6 +7,7 @@ namespace ASP.Areas.HomeWork1.Models
 {
     public class OrderService
     {
+
         public static List<Models.OrderSearchArg> result { get; set; }
         public static List<Models.Order> order_data { get; set; }
         public OrderService()
