@@ -1,0 +1,330 @@
+﻿@model workshop1.Models.Order
+@{ ViewBag.Title = "建立訂單"; }
+
+@using (Html.BeginForm("CreateOrder", "Order", FormMethod.Post, new { id = "form" }))
+{
+    <table style="margin-top:20px">
+        <tr></tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.CustomerID, new { @class = "required" })</td>
+            <td colspan="3">
+                @Html.DropDownListFor(m => m.CustomerID, (SelectList)ViewBag.CustomerList, "請選擇", new { @class = "form-control", style = "width:200px" })
+                @Html.ValidationMessageFor(m => m.CustomerID)
+            </td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.EmployeeID, new { @class = "required" })</td>
+            <td colspan="3">
+                @Html.DropDownListFor(m => m.EmployeeID, (IEnumerable<SelectListItem>)ViewBag.EmployeeList, "請選擇", new { @class = "form-control", style = "width:200px" })
+                @Html.ValidationMessageFor(m => m.EmployeeID)
+            </td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.OrderDate, new { @class = "required" })</td>
+            <td>
+                @Html.TextBoxFor(m => m.OrderDate, new { type = "date", @class = "form-control", style = "width:150px" })
+                @Html.ValidationMessageFor(m => m.OrderDate)
+            </td>
+            <td>@Html.LabelFor(m => m.RequiredDate, new { @class = "required" })</td>
+            <td>
+                @Html.TextBoxFor(m => m.RequiredDate, new { type = "date", @class = "form-control", style = "width:150px" })
+                @Html.ValidationMessageFor(m => m.RequiredDate)
+            </td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.ShippedDate)</td>
+            <td colspan="3">
+                @Html.TextBoxFor(m => m.ShippedDate, new { type = "date", @class = "form-control", style = "width:150px" })
+            </td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.ShipperID)</td>
+            <td colspan="3">
+                @Html.DropDownListFor(m => m.ShipperID, (IEnumerable<SelectListItem>)ViewBag.ShipperList, "請選擇", new { @class = "form-control", style = "width:200px" })
+                @Html.ValidationMessageFor(m => m.ShipperID)
+            </td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.Freight)</td>
+            <td colspan="3">
+                @Html.TextBoxFor(m => m.Freight, new { type = "number", @class = "", style = "width:150px" })
+                @Html.ValidationMessageFor(m => m.Freight)
+            </td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.ShipCountry)</td>
+            <td>
+                @Html.TextBoxFor(m => m.ShipCountry, new { @class = "form-control k-textbox" })
+                @Html.ValidationMessageFor(m => m.ShipCountry)
+            </td>
+            <td>@Html.LabelFor(m => m.ShipCity)</td>
+            <td>
+                @Html.TextBoxFor(m => m.ShipCity, new { @class = "form-control  k-textbox" })
+                @Html.ValidationMessageFor(m => m.ShipCity)
+            </td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.ShipRegion)</td>
+            <td>
+                @Html.TextBoxFor(m => m.ShipRegion, new { @class = "form-control  k-textbox" })
+                @Html.ValidationMessageFor(m => m.ShipRegion)
+            </td>
+            <td>@Html.LabelFor(m => m.ShipPostalCode)</td>
+            <td>
+                @Html.TextBoxFor(m => m.ShipPostalCode, new { @class = "form-control  k-textbox" })
+                @Html.ValidationMessageFor(m => m.ShipPostalCode)
+            </td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.ShipAddress)</td>
+            <td colspan="3">
+                @Html.TextBoxFor(m => m.ShipAddress, new { @class = "form-control  k-textbox" })
+                @Html.ValidationMessageFor(m => m.ShipAddress)
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="3">
+                <input value="存檔" class="btn btn-primary" id="save"/>
+                <button type="button" class="btn btn-warning" onclick="location.href='@Url.Action("Query", "Order")';">回前一頁</button>
+            </td>
+        </tr>
+    </table>
+
+    <div id="grid"></div>
+    @*<button type="button" onclick="AddDetail();">新增商品</button>
+    <table id="detailTable" style="border: 1px solid black; width: 80%" class="DetailTable">
+        <tr>
+            <th>商品</th>
+            <th>單價</th>
+            <th>數量</th>
+            <th>小計</th>
+            <th>動作</th>
+        </tr>
+
+    </table>*@
+}
+<script type="text/javascript">
+    @if(!string.IsNullOrWhiteSpace(ViewBag.ErrorMessage))
+    {
+        <text>
+        alert("@ViewBag.ErrorMessage");
+        </text>
+    }
+
+    $(document).ready(function () {
+
+        dropdownlist_data = [];
+        $.ajax({
+            type: "GET",
+            url: "/Order/GetProducts",
+            dataType: "json",
+            success: function (data) {
+                dropdownlist_data = data;
+            }
+        })
+
+        $("#CustomerID").kendoDropDownList();
+        $("#EmployeeID").kendoDropDownList();
+
+        $("#OrderDate").kendoDatePicker();
+        $("#ShippedDate").kendoDatePicker();
+        $("#RequiredDate").kendoDatePicker();
+
+        $("#ShipperID").kendoDropDownList();
+
+        $("#Freight").kendoNumericTextBox({
+            format: "#",
+            min: 0
+        });
+
+        $("#grid").kendoGrid({
+            dataSource: {
+
+                autoSync: true,
+                schema: {
+                    model: {
+                        id: "ProductID",
+                        fields: {
+                            ProductID: {
+                                editable: true
+                            },
+                            UnitPrice: {
+                                editable: true,
+                                defaultValue: 0
+                            },
+                            Qty: {
+                                editable: true,
+                                defaultValue: 0
+                            }
+                        }, total: function () {
+                            return this.get("UnitPrice") * this.get("Qty");
+                        }, transportname: function () {
+                            var name;
+                            var product_id = this.get("ProductID");
+
+                            dropdownlist_data.forEach(function(v, i){
+                                if (product_id == v.Value) {
+                                    name = v.Text;
+                                }
+                            })
+                            return name;
+                        }
+                    }
+                }
+            },
+            sortable: true,
+            toolbar: ['create'],
+            editable: true,
+            //dataBound: add_kendolist,
+            columns: [{
+                field: "ProductID",
+                title: "商品",
+                editor: categoryDropDownEditor,
+                template: "#=transportname()#"
+            }, {
+                field: "UnitPrice",
+                title: "單價"
+            }, {
+                field: "Qty",
+                title: "數量"
+            }, {
+                field: "",
+                title: "小計",
+                template: "#=total()#"
+            }, {
+                field: "動作",
+                command: "destroy"
+            }], save: function (e) {
+
+            }
+        });
+
+    });
+
+    function categoryDropDownEditor(container, options) {
+
+        $('<input required name="' + options.field + '"/>')
+            .appendTo(container)
+            .kendoDropDownList({
+                autoBind: false,
+                dataTextField: "Text",
+                dataValueField: "Value",
+                dataSource: dropdownlist_data,
+                change: function (e) {
+
+                    var dataItem = e.sender.dataItem();
+                    var price = ChangePrice(dataItem.Value);
+
+                    options.model.set("UnitPrice", price);
+                    //var grid = $("#grid").data("kendoGrid");
+
+                    //real data not show
+                    //var items = grid.dataSource.data();
+                    //console.log("items", items);
+                    //items[index]['price'] = r;
+                    //var uid = items[index]['uid'];
+                    //console.log("itemsss", items);
+                    ////show
+                    //$("tr[data-uid*=" + dataItem.uid + "] td:eq(1) ").html(price);
+
+                }
+        });
+
+    }
+
+    function ChangePrice(value) {
+        var price = 0;
+        $.ajax({
+            type: "GET",
+            url: "/Order/GetProductPrice?ProductID=" + value,
+            dataType: "json",
+            async: false,
+            success: function (r) {
+                price = r;
+                //console.log('change_price', r);
+                //var grid = $("#grid").data("kendoGrid");
+                //console.log('index', index);
+                //console.log('grid', grid.dataSource.data()[index]);
+                ////grid.dataSource.data()[index]['price'] = r;
+                //for (var i = 0; i < grid.dataSource.total(); i++) {
+                //    var selected_option = $("#product_" + i).find(":selected");
+                //    selected_dict[i] = selected_option.val();
+                //    console.log("option_value", selected_option.val());
+                //    console.log("selected_dict", selected_dict);
+                //}
+
+                ////real data not show
+                //var items = grid.dataSource.data();
+                //items[index]['price'] = r;
+                //var uid = items[index]['uid'];
+                //console.log("itemsss", items);
+                ////show
+                ////grid.refresh();
+                //$("tr[data-uid*=" + uid + "] td:eq(1) ").html(r);
+
+                ////var selected_option = $("#product_"+index).find(":selected");
+                ////console.log("selected_option", selected_option.val());
+                ////selected_dict[index] = selected_option.val();
+
+                ////console.log("selected_dict",selected_dict);
+                ////grid.refresh();
+
+                //Caculate(index);
+            },
+            error: function (r) {
+                price = '';
+            }
+        })
+        return price;
+    }
+
+    $("#save").click(function (e) {
+        var submit = $("#grid").data("kendoGrid").dataSource.data();
+
+        var form = $("#form").serializeArray();
+
+        var json = {};
+        form.forEach(function (v, i) {
+            json[v.name] = v.value;
+        })
+
+        var order_detail_list = [];
+        for (var i = 0; i < submit.length; i++) {
+            var detail = {};
+            detail['ProductID'] = submit[i].ProductID;
+            detail['Qty'] = submit[i].Qty;
+            detail['UnitPrice'] = submit[i].UnitPrice;
+            order_detail_list.push(detail);
+        }
+
+        json['Details'] = order_detail_list;
+
+        $.ajax({
+            url: '@Url.Action("CreateOrder", "Order")',
+            type: 'Post',
+            data: json,
+            success: function (msg) {
+                alert(msg);
+                window.location.href = '@Url.Action("Query", "Order")';
+            },error: function (msg) {
+                alert("錯誤，出現有錯誤的欄位");
+            }
+        })
+    })
+
+</script>
+
+<style>
+    .DetailTable {
+        border: 1px solid black
+    }
+
+        .DetailTable th {
+            border: 1px solid black
+        }
+
+        .DetailTable td {
+            border: 1px solid black
+        }
+</style>

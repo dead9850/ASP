@@ -1,0 +1,201 @@
+﻿@*@model IList<workshop1.Models.Order>*@
+@model workshop1.Models.OrderQueryArg
+@{
+    ViewBag.Title = "訂單查詢頁面";
+    IList<workshop1.Models.Customer> customers = ViewBag.Customers;
+}
+
+@*<form action="/Order/OrderList" method="POST">*@
+<table style="margin-top:10px;">
+    <tr>
+        <td>@Html.LabelFor(m => m.OrderID)</td>
+        <td colspan="3">@Html.TextBoxFor(m => m.OrderID, new { type = "number", @class = "input-number", style = "width:200px" })</td>
+    </tr>
+    <tr>
+        <td>@Html.LabelFor(m => m.CompanyName)</td>
+        <td colspan="3">@Html.TextBoxFor(m => m.CompanyName, new { @class = "form-control k-textbox", style = "width:200px" })</td>
+    </tr>
+    <tr>
+        <td>@Html.LabelFor(m => m.EmployeeID)</td>
+        <td colspan="3">@Html.DropDownListFor(m => m.EmployeeID, (IEnumerable<SelectListItem>)ViewBag.EmployeeList, "請選擇", new { @class = "form-control", style = "width:200px" })</td>
+    </tr>
+    <tr>
+        <td>@Html.LabelFor(m => m.ShipperID)</td>
+        <td colspan="3">@Html.DropDownListFor(m => m.ShipperID, (IEnumerable<SelectListItem>)ViewBag.ShipperList, "請選擇", new { @class = "form-control", style = "width:200px" })</td>
+    </tr>
+    <tr>
+        <td>@Html.LabelFor(m => m.OrderDate)</td>
+        <td>@Html.TextBoxFor(m => m.OrderDate, new { type = "date", @class = "form-control", style = "width:200px" })</td>
+        <td>@Html.LabelFor(m => m.ShipedDate)</td>
+        <td>@Html.TextBoxFor(m => m.ShipedDate, new { type = "date", @class = "form-control", style = "width:200px" })</td>
+    </tr>
+    <tr>
+        <td>@Html.LabelFor(m => m.RequiredDate)</td>
+        <td colspan="3">@Html.TextBoxFor(m => m.RequiredDate, new { type = "date", @class = "form-control", style = "width:200px" })</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td colspan="3">
+            <input type="button" id="Search" value="查詢" class="btn btn-primary" />
+            <input type="reset" value="清除" class="btn btn-warning" />
+            <button type="button" class="btn btn-info" onclick="location.href='@Url.Action("CreateOrder", "Order")';">新增訂單</button>
+        </td>
+    </tr>
+</table>
+@*</form>*@
+
+<br>
+<div id="grid"></div>
+<script>
+    $(document).ready(function() {
+        // create DatePicker from input HTML element
+        $("#OrderDate").kendoDatePicker();
+        $("#ShipedDate").kendoDatePicker();
+        $("#RequiredDate").kendoDatePicker();
+
+
+        $("#OrderID").kendoNumericTextBox({
+            format: "#",
+            min: 0
+        });
+
+        $("#EmployeeID").kendoDropDownList();
+        $("#ShipperID").kendoDropDownList();
+
+
+        //Ajax
+        $("#Search").click(function () {
+
+            $.ajax({
+                type: "POST",
+                url: "/Order/Query",
+                data: {
+                    OrderID: $("#OrderID").val(),
+                    CompanyName: $("#CompanyName").val(),
+                    EmployeeID: $("#EmployeeID").val(),
+                    ShipperID: $("#ShipperID").val(),
+                    OrderDate: $("#OrderDate").val(),
+                    ShipedDate: $("#ShipedDate").val(),
+                    RequiredDate: $("#RequiredDate").val(),
+                },
+                dataType: "json",
+                success: function (data) {
+
+                    var arr = new Array();
+
+                    for (var i = 0; i < data.length; i++) {
+                        arr.push({
+                                "OrderID": data[i]['Item1'], "CompanyName": data[i]['Item2'],
+                                "OrderDate": data[i]['Item3'], "ShipedDate": data[i]['Item4'], "Freight": data[i]['Item5']
+                        });
+                    }
+
+                    $("#grid").kendoGrid({
+                        dataSource: new kendo.data.DataSource({
+                            data: arr,
+                            pageSize: 10
+                        }),
+                        height: 340,
+                        sortable: true,
+                        pageable: {
+                            refresh: true,
+                            pageSizes: true,
+                            buttonCount: 5
+                        },
+                        columns: [{
+                            field: "OrderID",
+                            title: "訂單編號",
+                        }, {
+                            field: "CompanyName",
+                            title: "客戶名稱"
+                        }, {
+                            field: "OrderDate",
+                            title: "訂購日期"
+                        }, {
+                            field: "ShipedDate",
+                            title: "發貨日期",
+                        }, {
+                            field: "Freight",
+                            title: "運費",
+                        }, {
+                            field: "",
+                            template: function (dataItem) {
+                                return "<a href='/Order/UpdateOrder?orderID=" + dataItem.OrderID + "'>修改</a>";
+                           }
+                        }, {
+                            field: "",
+                            template: function (dataItem) {
+                                return "<input type='button' value='刪除' onclick='DeleteOrder(" + dataItem.OrderID + ")'>";
+                            }
+                        }]
+                    });
+
+
+                },
+                error: function (e) {
+
+                }
+            })
+        });
+
+    });
+
+    function DeleteOrder(orderId) {
+        $.ajax({
+            type: "GET",
+            url: "/Order/DeleteOrder?OrderID=" + orderId,
+            dataType: "json",
+            success: function (r) {
+                alert('刪除成功');
+                location.href = '@Url.Action("Query", "Order")'
+            },
+            error: function (r) {
+                alert('刪除失敗!!');
+            },
+        })
+    }
+</script>
+
+
+ @*-------------------------
+     Original*@
+@*@using (Html.BeginForm("OrderList", "Order", FormMethod.Post))
+{
+
+    <table style="margin-top:10px;">
+        <tr>
+            <td>@Html.LabelFor(m => m.OrderID)</td>
+            <td colspan="3">@Html.TextBoxFor(m => m.OrderID, new { type= "number", @class="form-control input-number", style="width:200px"})</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.CompanyName)</td>
+            <td colspan="3">@Html.TextBoxFor(m => m.CompanyName, new { @class="form-control", style = "width:200px" })</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.EmployeeID)</td>
+            <td colspan="3">@Html.DropDownListFor(m => m.EmployeeID, (IEnumerable<SelectListItem>)ViewBag.EmployeeList, "請選擇", new { @class = "form-control", style = "width:200px" })</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.ShipperID)</td>
+            <td colspan="3">@Html.DropDownListFor(m => m.ShipperID, (IEnumerable<SelectListItem>)ViewBag.ShipperList, "請選擇", new { @class = "form-control", style = "width:200px" })</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.OrderDate)</td>
+            <td>@Html.TextBoxFor(m => m.OrderDate, new { type = "date" , @class="form-control", style = "width:200px" })</td>
+            <td>@Html.LabelFor(m => m.ShipedDate)</td>
+            <td>@Html.TextBoxFor(m => m.ShipedDate, new { type = "date", @class = "form-control", style = "width:200px" })</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(m => m.RequiredDate)</td>
+            <td colspan="3">@Html.TextBoxFor(m => m.RequiredDate, new { type = "date", @class = "form-control", style = "width:200px" })</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="3">
+                <input type="submit" value="查詢" class="btn btn-primary" />
+                <input type="reset" value="清除" class="btn btn-warning" />
+                <button type="button" class="btn btn-info" onclick="location.href='@Url.Action("CreateOrder", "Order")';">新增訂單</button>
+            </td>
+        </tr>
+    </table>
+}*@
